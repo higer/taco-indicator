@@ -80,22 +80,27 @@ async function fetchYahoo(symbol) {
 }
 
 // ========== FRED Fetcher (requires API key) ==========
+// Returns: { status: 'no_key' } | { status: 'error', message: string } | { status: 'ok', data: array }
 async function fetchFred(seriesId) {
   const apiKey = process.env.FRED_API_KEY;
-  if (!apiKey || apiKey === 'your_key_here') return null;
+  if (!apiKey || apiKey === 'your_key_here') {
+    return { status: 'no_key' };
+  }
 
   const url = `https://api.stlouisfed.org/fred/series/observations?series_id=${seriesId}&api_key=${apiKey}&file_type=json&sort_order=desc&limit=24&frequency=m`;
   try {
     const resp = await fetch(url, { timeout: 15000 });
-    if (!resp.ok) return null;
+    if (!resp.ok) {
+      return { status: 'error', message: `FRED API returned HTTP ${resp.status} for ${seriesId}` };
+    }
     const json = await resp.json();
-    return json.observations
+    const data = json.observations
       .filter(o => o.value !== '.')
       .map(o => ({ month: o.date.slice(0, 7), value: parseFloat(o.value) }))
       .reverse();
+    return { status: 'ok', data };
   } catch (err) {
-    console.error(`FRED fetch error for ${seriesId}:`, err.message);
-    return null;
+    return { status: 'error', message: `FRED fetch error for ${seriesId}: ${err.message}` };
   }
 }
 
@@ -156,13 +161,16 @@ async function fetchAllData() {
   // 3. FRED-based: Mortgage rate (MORTGAGE30US)
   try {
     console.log('[fetcher] Fetching mortgage rate from FRED...');
-    const mortgageData = await fetchFred('MORTGAGE30US');
-    if (mortgageData) {
-      data.mortgage = mergeMonthlyData(data.months, data.mortgage, mortgageData);
+    const mortgageResult = await fetchFred('MORTGAGE30US');
+    if (mortgageResult.status === 'ok') {
+      data.mortgage = mergeMonthlyData(data.months, data.mortgage, mortgageResult.data);
       updated = true;
-      console.log('[fetcher] Mortgage rate updated:', mortgageData.length, 'months');
-    } else {
+      console.log('[fetcher] Mortgage rate updated:', mortgageResult.data.length, 'months');
+    } else if (mortgageResult.status === 'no_key') {
       console.log('[fetcher] Mortgage rate: FRED_API_KEY not set, skipping');
+    } else {
+      errors.push('Mortgage: ' + mortgageResult.message);
+      console.error('[fetcher] Mortgage rate fetch failed:', mortgageResult.message);
     }
   } catch (err) {
     errors.push('Mortgage: ' + err.message);
@@ -171,13 +179,16 @@ async function fetchAllData() {
   // 4. FRED-based: 5Y Breakeven Inflation (T5YIEM)
   try {
     console.log('[fetcher] Fetching 5Y breakeven inflation from FRED...');
-    const inflateData = await fetchFred('T5YIEM');
-    if (inflateData) {
-      data.inflate = mergeMonthlyData(data.months, data.inflate, inflateData);
+    const inflateResult = await fetchFred('T5YIEM');
+    if (inflateResult.status === 'ok') {
+      data.inflate = mergeMonthlyData(data.months, data.inflate, inflateResult.data);
       updated = true;
-      console.log('[fetcher] Breakeven inflation updated:', inflateData.length, 'months');
-    } else {
+      console.log('[fetcher] Breakeven inflation updated:', inflateResult.data.length, 'months');
+    } else if (inflateResult.status === 'no_key') {
       console.log('[fetcher] Breakeven inflation: FRED_API_KEY not set, skipping');
+    } else {
+      errors.push('Inflation: ' + inflateResult.message);
+      console.error('[fetcher] Breakeven inflation fetch failed:', inflateResult.message);
     }
   } catch (err) {
     errors.push('Inflation: ' + err.message);
