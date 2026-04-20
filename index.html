@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TACO 指标 — Trump Always Chickens Out</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://cdn.jsdelivr.net/npm/echarts@5/dist/echarts.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/gsap@3/dist/gsap.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/gsap@3/dist/ScrollTrigger.min.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;700;900&family=JetBrains+Mono:wght@400;700&family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg-deep: #0a0a14;
+  --bg-card: rgba(18, 18, 32, 0.85);
+  --accent-red: #ff3b3b;
+  --accent-gold: #f5c542;
+  --accent-cyan: #00e5ff;
+  --accent-green: #00e676;
+  --accent-purple: #b388ff;
+  --accent-orange: #ff9100;
+  --text-primary: #e0ddd5;
+  --text-muted: #8a8a9a;
+  --glow-red: 0 0 30px rgba(255,59,59,0.3);
+}
+* { margin:0; padding:0; box-sizing:border-box; }
+body { font-family:'Inter',sans-serif; background:var(--bg-deep); }
+h1,h2,h3,.serif { font-family:'Noto Serif SC','serif'; }
+.mono { font-family:'JetBrains Mono',monospace; }
+#progress-bar { position:fixed; top:0; left:0; height:3px; background:linear-gradient(90deg,var(--accent-red),var(--accent-gold)); z-index:9999; width:0; transition:width 0.1s; }
+.grain::before { content:''; position:fixed; top:0; left:0; width:100%; height:100%; background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E"); pointer-events:none; z-index:0; }
+.card { background:var(--bg-card); border:1px solid rgba(255,255,255,0.06); border-radius:12px; backdrop-filter:blur(12px); }
+.glow-red { box-shadow:var(--glow-red); }
+.chart-box { width:100%; height:420px; }
+@media(max-width:768px){ .chart-box{height:320px;} }
+.hero-bg { background: radial-gradient(ellipse at 50% 0%, rgba(255,59,59,0.12) 0%, transparent 60%), radial-gradient(ellipse at 80% 80%, rgba(0,229,255,0.06) 0%, transparent 50%); }
+.timeline-line { position:absolute; left:50%; top:0; bottom:0; width:2px; background:linear-gradient(180deg,var(--accent-red),var(--accent-gold),var(--accent-cyan)); }
+@media(max-width:768px){ .timeline-line{left:20px;} }
+.timeline-dot { width:14px; height:14px; border-radius:50%; border:2px solid var(--accent-gold); background:var(--bg-deep); position:absolute; left:50%; transform:translateX(-50%); }
+@media(max-width:768px){ .timeline-dot{left:20px;} }
+.fade-up { opacity:0; transform:translateY(40px); }
+.section-title::after { content:''; display:block; width:60px; height:3px; background:linear-gradient(90deg,var(--accent-red),var(--accent-gold)); margin-top:12px; }
+.kpi-num { font-size:2.5rem; font-weight:900; line-height:1; }
+@media(max-width:768px){ .kpi-num{font-size:1.8rem;} }
+</style>
+</head>
+<body class="bg-[#0a0a14] text-[#e0ddd5] overflow-x-hidden">
+<!-- Progress Bar -->
+<div id="progress-bar"></div>
+<div class="grain"></div>
+
+<!-- Hero Section -->
+<section class="hero-bg min-h-screen flex flex-col justify-center items-center px-4 relative">
+  <div class="absolute top-6 right-6 mono text-xs text-[var(--text-muted)]">数据截至 2026.04.20</div>
+  <div class="text-center max-w-4xl fade-up">
+    <p class="mono text-sm tracking-[0.3em] text-[var(--accent-gold)] mb-6">MARKET STRESS COMPOSITE INDEX</p>
+    <h1 class="text-5xl md:text-8xl font-black leading-none mb-4" style="background:linear-gradient(135deg,#ff3b3b,#f5c542);-webkit-background-clip:text;-webkit-text-fill-color:transparent;">
+      TACO 指标
+    </h1>
+    <p class="text-lg md:text-2xl text-[var(--text-muted)] mt-2 mb-6 serif">Trump Always Chickens Out</p>
+    <p class="text-base md:text-lg max-w-2xl mx-auto leading-relaxed text-[var(--text-muted)]">
+      追踪特朗普第二任期内六大市场压力因子。当压力突破阈值，政策总会转向 —— 至少 <span class="text-[var(--accent-gold)] font-bold">11 次</span>。
+    </p>
+    <div class="mt-10 flex items-center justify-center gap-2 text-[var(--text-muted)] text-sm animate-bounce">
+      <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 3v14M5 12l5 5 5-5"/></svg>
+      <span class="mono">SCROLL</span>
+    </div>
+  </div>
+</section>
+<!-- Summary KPI Cards -->
+<section class="py-20 px-4 md:px-8 max-w-7xl mx-auto">
+  <h2 class="serif text-3xl md:text-4xl font-bold section-title fade-up mb-12">关键指标一览</h2>
+  <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+    <div class="card p-5 fade-up text-center">
+      <p class="text-xs mono text-[var(--text-muted)] mb-2">S&P 500</p>
+      <p class="kpi-num text-[var(--accent-green)]">7,126</p>
+      <p class="text-xs mono mt-1 text-[var(--accent-green)]">+18.8%</p>
+    </div>
+    <div class="card p-5 fade-up text-center">
+      <p class="text-xs mono text-[var(--text-muted)] mb-2">10Y 国债收益率</p>
+      <p class="kpi-num text-[var(--accent-cyan)]">4.32%</p>
+      <p class="text-xs mono mt-1 text-[var(--accent-green)]">↓ 26bp</p>
+    </div>
+    <div class="card p-5 fade-up text-center">
+      <p class="text-xs mono text-[var(--text-muted)] mb-2">30Y 抵押贷款</p>
+      <p class="kpi-num text-[var(--accent-purple)]">6.30%</p>
+      <p class="text-xs mono mt-1 text-[var(--accent-green)]">↓ 74bp</p>
+    </div>
+    <div class="card p-5 fade-up text-center">
+      <p class="text-xs mono text-[var(--text-muted)] mb-2">汽油均价</p>
+      <p class="kpi-num text-[var(--accent-orange)]">$4.06</p>
+      <p class="text-xs mono mt-1 text-[var(--accent-red)]">+32.0%</p>
+    </div>
+    <div class="card p-5 fade-up text-center">
+      <p class="text-xs mono text-[var(--text-muted)] mb-2">5Y 通胀预期</p>
+      <p class="kpi-num text-[var(--accent-gold)]">2.56%</p>
+      <p class="text-xs mono mt-1 text-[var(--accent-red)]">+7bp</p>
+    </div>
+    <div class="card p-5 fade-up text-center">
+      <p class="text-xs mono text-[var(--text-muted)] mb-2">支持率</p>
+      <p class="kpi-num text-[var(--accent-red)]">36.9%</p>
+      <p class="text-xs mono mt-1 text-[var(--accent-red)]">↓ 8.0pp</p>
+    </div>
+  </div>
+  <p class="text-xs text-[var(--text-muted)] mono mt-6 text-center fade-up">数据来源：Yahoo Finance, FRED, EIA, Freddie Mac, Civiqs &nbsp;|&nbsp; 基准日：2025-01-20 就职日</p>
+</section>
+
+<!-- TACO Composite Chart -->
+<section class="py-16 px-4 md:px-8 max-w-7xl mx-auto">
+  <h2 class="serif text-3xl md:text-4xl font-bold section-title fade-up mb-4">TACO 综合压力指数</h2>
+  <p class="text-sm text-[var(--text-muted)] fade-up mb-8 max-w-3xl">将六大因子标准化（Z-Score）后加权合成。指数越高，市场压力越大，政策转向概率越高。红色区域标注"退缩"事件。</p>
+  <div class="card p-4 md:p-6 fade-up">
+    <div id="chart-taco" class="chart-box" style="height:500px;"></div>
+  </div>
+</section>
+
+<!-- Six Sub-indicator Charts -->
+<section class="py-16 px-4 md:px-8 max-w-7xl mx-auto">
+  <h2 class="serif text-3xl md:text-4xl font-bold section-title fade-up mb-12">六大压力因子</h2>
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+    <div class="card p-4 md:p-6 fade-up">
+      <h3 class="serif text-lg mb-1 text-[var(--accent-green)]">S&P 500 指数</h3>
+      <p class="text-xs text-[var(--text-muted)] mono mb-3">短期股市走势</p>
+      <div id="chart-sp500" class="chart-box"></div>
+    </div>
+    <div class="card p-4 md:p-6 fade-up">
+      <h3 class="serif text-lg mb-1 text-[var(--accent-cyan)]">10 年期国债收益率</h3>
+      <p class="text-xs text-[var(--text-muted)] mono mb-3">长期利率趋势</p>
+      <div id="chart-yield" class="chart-box"></div>
+    </div>
+    <div class="card p-4 md:p-6 fade-up">
+      <h3 class="serif text-lg mb-1 text-[var(--accent-purple)]">30 年固定抵押贷款利率</h3>
+      <p class="text-xs text-[var(--text-muted)] mono mb-3">房贷成本</p>
+      <div id="chart-mortgage" class="chart-box"></div>
+    </div>
+    <div class="card p-4 md:p-6 fade-up">
+      <h3 class="serif text-lg mb-1 text-[var(--accent-orange)]">全美汽油均价</h3>
+      <p class="text-xs text-[var(--text-muted)] mono mb-3">消费者敏感指标</p>
+      <div id="chart-gas" class="chart-box"></div>
+    </div>
+    <div class="card p-4 md:p-6 fade-up">
+      <h3 class="serif text-lg mb-1 text-[var(--accent-gold)]">5 年盈亏平衡通胀率</h3>
+      <p class="text-xs text-[var(--text-muted)] mono mb-3">市场隐含通胀预期</p>
+      <div id="chart-inflation" class="chart-box"></div>
+    </div>
+    <div class="card p-4 md:p-6 fade-up">
+      <h3 class="serif text-lg mb-1 text-[var(--accent-red)]">总统支持率</h3>
+      <p class="text-xs text-[var(--text-muted)] mono mb-3">Civiqs 登记选民跟踪</p>
+      <div id="chart-approval" class="chart-box"></div>
+    </div>
+  </div>
+</section>
+
+<!-- Chicken-Out Timeline -->
+<section class="py-16 px-4 md:px-8 max-w-6xl mx-auto">
+  <h2 class="serif text-3xl md:text-4xl font-bold section-title fade-up mb-12">「退缩」时间线</h2>
+  <div class="relative" id="timeline-container">
+    <div class="timeline-line"></div>
+    <!-- timeline items injected by JS -->
+  </div>
+</section>
+
+<!-- Footer -->
+<footer class="py-12 text-center border-t border-white/5">
+  <p class="mono text-xs text-[var(--text-muted)]">TACO INDICATOR &copy; 2026 &nbsp;|&nbsp; 数据仅供参考，不构成投资建议</p>
+  <p class="mono text-xs text-[var(--text-muted)] mt-2">Sources: Yahoo Finance, FRED, EIA, Freddie Mac PMMS, Civiqs, Tax Foundation</p>
+</footer>
+<script>
+// ========== DATA ==========
+const months = ['2025-01','2025-02','2025-03','2025-04','2025-05','2025-06','2025-07','2025-08','2025-09','2025-10','2025-11','2025-12','2026-01','2026-02','2026-03','2026-04'];
+const labels = months.map(m=>{const[y,mo]=m.split('-');return y.slice(2)+'/'+mo;});
+
+const sp500   = [6040,5954,5611,5569,5912,6205,6339,6460,6688,6840,6849,6846,6939,6879,6529,7126];
+const yield10 = [4.54,4.24,4.23,4.17,4.41,4.24,4.37,4.23,4.16,4.11,4.02,4.18,4.26,3.97,4.30,4.32];
+const mortgage= [6.95,6.76,6.65,6.83,6.89,6.77,6.72,6.56,6.26,6.17,6.23,6.15,6.10,5.98,6.38,6.30];
+const gas     = [3.076,3.121,3.096,3.171,3.150,3.150,3.125,3.133,3.166,3.060,3.050,2.894,2.809,2.908,3.638,4.060];
+const inflate = [2.49,2.61,2.53,2.35,2.38,2.33,2.44,2.44,2.43,2.36,2.35,2.28,2.39,2.45,2.56,2.56];
+const approve = [44.9,43.3,42.6,42.1,42.0,40.4,38.5,38.0,39.0,39.4,38.0,37.8,39.0,38.4,38.3,36.9];
+
+// Baselines (inauguration values)
+const base = { sp:6000, y:4.58, m:7.04, g:3.076, i:2.49, a:44.9 };
+
+// Z-score helper
+function zScores(arr){ const mu=arr.reduce((a,b)=>a+b,0)/arr.length; const sd=Math.sqrt(arr.reduce((a,v)=>a+(v-mu)**2,0)/arr.length)||1; return arr.map(v=>(v-mu)/sd); }
+
+// For TACO: higher = more stress. Invert S&P (drop=stress) and approval (drop=stress). Keep others as-is (rise=stress).
+const z_sp = zScores(sp500).map(v => -v);
+const z_y  = zScores(yield10);
+const z_m  = zScores(mortgage);
+const z_g  = zScores(gas);
+const z_i  = zScores(inflate);
+const z_a  = zScores(approve).map(v => -v);
+
+const taco = months.map((_,i) => {
+  const raw = (z_sp[i]*0.25 + z_y[i]*0.15 + z_m[i]*0.15 + z_g[i]*0.20 + z_i[i]*0.10 + z_a[i]*0.15);
+  return Math.round(raw * 100) / 100;
+});
+
+// Chicken-out events for markLines
+const chickenEvents = [
+  {x:'25/03',label:'#1-2 汽车豁免'},
+  {x:'25/04',label:'#3 暂停90天'},
+  {x:'25/05',label:'#4 对华暂停'},
+  {x:'25/06',label:'#5 中美协议'},
+  {x:'25/07',label:'延期墨关税'},
+  {x:'25/08',label:'#6 EU延期'},
+  {x:'25/10',label:'#7-8 中墨暂停'},
+  {x:'25/12',label:'#9 家具暂停'},
+  {x:'26/01',label:'#10 格陵兰撤回'},
+  {x:'26/02',label:'#11 印度取消'},
+];
+
+// ========== CHART THEME ==========
+const darkTheme = {
+  backgroundColor:'transparent',
+  textStyle:{color:'#8a8a9a',fontFamily:'Inter,sans-serif',fontSize:11},
+  legend:{textStyle:{color:'#8a8a9a',fontSize:11}},
+  grid:{top:60,right:20,bottom:36,left:60,containLabel:false},
+};
+
+function makeTooltip(unit='',prefix=''){
+  return {
+    trigger:'axis',backgroundColor:'rgba(12,12,24,0.92)',borderColor:'rgba(255,255,255,0.1)',borderWidth:1,
+    textStyle:{color:'#e0ddd5',fontFamily:'JetBrains Mono',fontSize:12},
+    formatter:function(ps){
+      let s='<div style="font-weight:700;margin-bottom:6px">'+ps[0].axisValue+'</div>';
+      ps.forEach(p=>{s+='<div style="display:flex;align-items:center;gap:6px"><span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:'+p.color+'"></span>'+p.seriesName+': <b>'+prefix+p.value+unit+'</b></div>';});
+      return s;
+    }
+  };
+}
+
+// ========== RENDER CHARTS ==========
+function initCharts(){
+  // TACO Composite
+  const cTaco = echarts.init(document.getElementById('chart-taco'),null,{renderer:'svg'});
+  cTaco.setOption({
+    ...darkTheme,
+    tooltip:makeTooltip(),
+    legend:{data:['TACO 压力指数'],top:10,textStyle:{color:'#8a8a9a'}},
+    xAxis:{type:'category',data:labels,axisLine:{lineStyle:{color:'#2a2a3a'}},axisTick:{show:false}},
+    yAxis:{type:'value',name:'压力值',splitLine:{lineStyle:{color:'rgba(255,255,255,0.04)'}},axisLine:{show:false}},
+    grid:{top:80,right:30,bottom:50,left:60},
+    series:[{
+      name:'TACO 压力指数',type:'line',data:taco,smooth:true,
+      lineStyle:{width:3,color:{type:'linear',x:0,y:0,x2:1,y2:0,colorStops:[{offset:0,color:'#ff3b3b'},{offset:1,color:'#f5c542'}]}},
+      areaStyle:{color:{type:'linear',x:0,y:0,x2:0,y2:1,colorStops:[{offset:0,color:'rgba(255,59,59,0.25)'},{offset:1,color:'rgba(255,59,59,0)'}]}},
+      symbol:'circle',symbolSize:8,itemStyle:{color:'#ff3b3b'},
+      markLine:{silent:true,symbol:'none',lineStyle:{type:'dashed',color:'rgba(245,197,66,0.4)',width:1},
+        data:chickenEvents.map(e=>({xAxis:e.x,label:{show:true,formatter:e.label,fontSize:9,color:'#f5c542',position:'insideEndTop',fontFamily:'Inter'}}))
+      },
+      markPoint:{data:[
+        {name:'关税风暴',coord:['25/04',taco[3]],symbol:'pin',symbolSize:40,itemStyle:{color:'#ff3b3b'},label:{show:true,formatter:'关税\n风暴',fontSize:9,color:'#fff'}},
+        {name:'伊朗冲突',coord:['26/03',taco[14]],symbol:'pin',symbolSize:40,itemStyle:{color:'#ff9100'},label:{show:true,formatter:'伊朗\n冲突',fontSize:9,color:'#fff'}}
+      ]}
+    }],
+    dataZoom:[{type:'inside',start:0,end:100}]
+  });
+
+  // Sub-charts helper
+  function hexToRgba(hex,a){const r=parseInt(hex.slice(1,3),16),g=parseInt(hex.slice(3,5),16),b=parseInt(hex.slice(5,7),16);return `rgba(${r},${g},${b},${a})`;}
+  function makeSub(domId, name, data, color, unit, prefix, markLines){
+    const c = echarts.init(document.getElementById(domId),null,{renderer:'svg'});
+    const opt = {
+      ...darkTheme,
+      tooltip:makeTooltip(unit,prefix||''),
+      xAxis:{type:'category',data:labels,axisLine:{lineStyle:{color:'#2a2a3a'}},axisTick:{show:false}},
+      yAxis:{type:'value',splitLine:{lineStyle:{color:'rgba(255,255,255,0.04)'}},axisLine:{show:false},scale:true},
+      series:[{
+        name:name,type:'line',data:data,smooth:true,symbol:'circle',symbolSize:5,
+        lineStyle:{width:2.5,color:color},
+        areaStyle:{color:{type:'linear',x:0,y:0,x2:0,y2:1,colorStops:[{offset:0,color:hexToRgba(color,0.18)},{offset:1,color:'transparent'}]}},
+        itemStyle:{color:color},
+        markLine:markLines||undefined
+      }],
+      dataZoom:[{type:'inside'}]
+    };
+    c.setOption(opt);
+    return c;
+  }
+
+  const eventLines = {silent:true,symbol:'none',lineStyle:{type:'dashed',color:'rgba(255,59,59,0.3)',width:1},
+    data:[{xAxis:'25/04',label:{show:true,formatter:'解放日',fontSize:9,color:'#ff3b3b',position:'insideEndTop'}},{xAxis:'26/03',label:{show:true,formatter:'伊朗',fontSize:9,color:'#ff9100',position:'insideEndTop'}}]};
+
+  const cSP = makeSub('chart-sp500','S&P 500',sp500,'#00e676','','',eventLines);
+  const cYi = makeSub('chart-yield','10Y 收益率',yield10,'#00e5ff','%','',eventLines);
+  const cMo = makeSub('chart-mortgage','30Y 房贷',mortgage,'#b388ff','%','',eventLines);
+  const cGa = makeSub('chart-gas','汽油 $/gal',gas,'#ff9100','','$',eventLines);
+  const cIn = makeSub('chart-inflation','5Y 通胀预期',inflate,'#f5c542','%','',eventLines);
+  const cAp = makeSub('chart-approval','支持率',approve,'#ff3b3b','%','',eventLines);
+
+  const allCharts = [cTaco,cSP,cYi,cMo,cGa,cIn,cAp];
+  window.addEventListener('resize',()=>allCharts.forEach(c=>c.resize()));
+}
+
+// ========== TIMELINE ==========
+function buildTimeline(){
+  const events = [
+    {date:'2025-02-04',title:'IEEPA 关税生效',desc:'对加拿大/墨西哥征25%、中国加征10%',type:'escalation'},
+    {date:'2025-02-20',title:'最高法院裁定 IEEPA 违宪',desc:'6-3 裁决，特朗普转用 Section 122',type:'court'},
+    {date:'2025-03-05',title:'退缩 #1-2',desc:'豁免加墨汽车进口，USMCA 合规货物降税',type:'chicken'},
+    {date:'2025-04-02',title:'「解放日」',desc:'全面对等关税：10% 普遍 + 高达50% 国别税率',type:'escalation'},
+    {date:'2025-04-09',title:'退缩 #3（重大）',desc:'S&P 暴跌14%后，除中国外暂停对等关税90天',type:'chicken'},
+    {date:'2025-05-12',title:'退缩 #4',desc:'对华升级暂停90天，对等税率降至10%',type:'chicken'},
+    {date:'2025-06-11',title:'退缩 #5',desc:'中美协议：关税降至30%（20%芬太尼+10%对等）',type:'chicken'},
+    {date:'2025-08-04',title:'退缩 #6',desc:'欧盟报复性关税延期6个月',type:'chicken'},
+    {date:'2025-10-26',title:'退缩 #7-8',desc:'中国框架协议 + 墨西哥无限期暂停',type:'chicken'},
+    {date:'2025-12-31',title:'退缩 #9',desc:'家具关税暂停一年',type:'chicken'},
+    {date:'2026-01-21',title:'退缩 #10',desc:'格陵兰相关关税撤回',type:'chicken'},
+    {date:'2026-02-02',title:'退缩 #11',desc:'取消对印度25%关税（换取停购俄油）',type:'chicken'},
+    {date:'2026-02-20',title:'最高法院终裁',desc:'IEEPA 关税权违宪（终审），转向 Section 122',type:'court'},
+    {date:'2026-03-10',title:'伊朗冲突',desc:'霍尔木兹海峡危机，油价飙升，汽油破$4',type:'escalation'},
+  ];
+
+  const container = document.getElementById('timeline-container');
+  let html = '<div class="timeline-line"></div>';
+  events.forEach((e,i)=>{
+    const isLeft = i%2===0;
+    const colors = {chicken:'var(--accent-gold)',escalation:'var(--accent-red)',court:'var(--accent-cyan)'};
+    const icons = {chicken:'🐔',escalation:'💥',court:'⚖️'};
+    html += `
+    <div class="relative flex ${isLeft?'md:flex-row':'md:flex-row-reverse'} items-start mb-10 fade-up" style="min-height:80px">
+      <div class="timeline-dot" style="top:6px;border-color:${colors[e.type]}"></div>
+      <div class="card p-4 ${isLeft?'md:mr-auto md:ml-0 md:pr-8':'md:ml-auto md:mr-0 md:pl-8'} ml-10 md:ml-0 md:w-[44%]" style="border-left:3px solid ${colors[e.type]}">
+        <div class="flex items-center gap-2 mb-1">
+          <span>${icons[e.type]}</span>
+          <span class="mono text-xs" style="color:${colors[e.type]}">${e.date}</span>
+        </div>
+        <h4 class="font-bold text-sm">${e.title}</h4>
+        <p class="text-xs text-[var(--text-muted)] mt-1">${e.desc}</p>
+      </div>
+    </div>`;
+  });
+  container.innerHTML = html;
+}
+
+// ========== SCROLL & ANIMATIONS ==========
+function initAnimations(){
+  gsap.registerPlugin(ScrollTrigger);
+  // Progress bar
+  gsap.to('#progress-bar',{
+    width:'100%',ease:'none',
+    scrollTrigger:{trigger:'body',start:'top top',end:'bottom bottom',scrub:0.3}
+  });
+  // Fade up elements
+  gsap.utils.toArray('.fade-up').forEach(el=>{
+    gsap.to(el,{opacity:1,y:0,duration:0.8,ease:'power2.out',
+      scrollTrigger:{trigger:el,start:'top 88%',toggleActions:'play none none none'}
+    });
+  });
+}
+
+// ========== INIT ==========
+document.addEventListener('DOMContentLoaded',()=>{
+  buildTimeline();
+  initCharts();
+  initAnimations();
+});
+</script>
+</body>
+</html>
