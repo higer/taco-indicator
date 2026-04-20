@@ -35,7 +35,10 @@ npm install
 
 ```bash
 cp .env.example .env
+# 编辑 .env 填入你的 FRED API Key 等配置
 ```
+
+项目使用 [dotenv](https://github.com/motdotla/dotenv) 自动加载 `.env` 文件。
 
 `.env` 文件中的变量：
 
