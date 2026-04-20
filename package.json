@@ -8,7 +8,7 @@
     "fetch": "node -e \"require('dotenv').config();require('./fetcher').fetchAllData().then(()=>console.log('Done')).catch(console.error)\""
   },
   "dependencies": {
-    "dotenv": "^17.4.2",
+    "dotenv": "^16.4.7",
     "express": "^4.18.2",
     "node-cron": "^3.0.3",
     "node-fetch": "^2.7.0"
